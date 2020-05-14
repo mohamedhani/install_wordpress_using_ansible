@@ -1,0 +1,58 @@
+---
+# tasks file for test.mysql
+- name: mount the dvd
+  mount:
+    src: /dev/sr0
+    path: /media
+    state: present
+    fstype: iso9660
+    opts: ro,relatime
+- block:
+    - name: install mysql 
+      yum: 
+        name: 
+          - mariadb-server
+          - MySQL-python
+          - mariadb-bench
+          - mariadb-test
+        state: latest
+    - name: start service 
+      service: 
+        name: mariadb
+        state: started
+        enabled: yes
+
+    - name: enable mysql on firewall
+      firewalld:
+        service: mysql
+        state: enabled
+        permanent: yes
+        immediate: yes
+    - name: generate the password for  mysql 
+      command:
+        cmd: openssl rand -base64 8
+      register: root_password
+ 
+    - name: create root file 
+      template:
+        src: mysql.root
+        dest: /root/.my.cnf
+    # output the root password
+    - debug:  
+        msg: "password is {{ root_password.stdout }} "
+        
+    - name: remove the annoymous users
+      mysql_user:
+        name: ''
+        host: localhost
+        state: absent
+        login_user: root
+        #login_password: "{{ root_password.stdout}}"
+     
+    - name: add root user
+      mysql_user:
+        name: root
+        password:  "{{ root_password.stdout }}"
+        host: localhost
+        state: present
+ 

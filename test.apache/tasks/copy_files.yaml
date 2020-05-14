@@ -1,0 +1,19 @@
+- name: copy the http.conf file
+  copy: 
+    src: files/httpd.conf 
+    dest: /etc/httpd/conf/
+    mode: 644 
+  notify: restart httpd
+
+- name: copy the wordpress.conf 
+  copy: 
+    src: files/wordpress.conf
+    dest: /etc/httpd/conf.d/
+    mode: 644
+  notify: restart httpd
+- name: copy the 00-mpm.conf
+  copy: 
+    src: files/00-mpm.conf
+    desc: /etc/httpd/conf.modules.d
+  
+  notify: restart httpd

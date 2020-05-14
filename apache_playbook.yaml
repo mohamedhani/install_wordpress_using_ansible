@@ -1,0 +1,5 @@
+- name: install apache role 
+  hosts: 
+    - serverc.lab.example.com 
+  roles:
+    - test.apache

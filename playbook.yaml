@@ -1,0 +1,5 @@
+- name: install nginx 
+  hosts: 
+  - servera.lab.example.com
+  roles:
+    - test.nginx

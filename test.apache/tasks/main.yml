@@ -1,0 +1,42 @@
+---
+# tasks file for test.apache
+- name: install apache 
+  package:
+    name:
+      - httpd
+      - openssl 
+      - mod_ssl
+      - wget
+    state: present
+
+- name: remove nginx 
+  package: 
+    name: nginx
+    state: absent
+
+- name: create the site directory
+  command:
+    cmd: mkdir -p /websites/site1
+  register: web_dir
+
+- name: start service
+  service:
+    name: httpd
+    state: started
+    enabled: yes
+- name: open ports on firewall 
+  firewalld: 
+    service: "{{ item }}"
+    state: enabled
+    permanent: yes 
+    immediate: yes 
+  with_items:
+    - http
+    - https
+
+- name: unarchive the wordpress
+  unarchive: 
+    src:  http://wordpress.org/latest.tar.gz
+    dest: /websites/site1/
+    remote_src: yes
+  

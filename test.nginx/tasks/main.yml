@@ -1,0 +1,38 @@
+---
+# tasks file for test.nginx
+- name: check the network
+  command: 
+     cmd: ping -c 1 8.8.8.8
+  register: is_connect_to_internet
+- block:
+    - debug:
+         msg: "it is connected"
+
+    - name: install epel-release repository
+      package:
+        name:  epel-release 
+        state: present
+
+    - name: install  nginx 
+      package:
+        name:  nginx
+        state: present
+    - name: start the service 
+      service:
+         name: nginx
+         state: started
+         enabled: yes
+    - name: enable nginx on firewall
+      firewalld:
+        service:  https
+        state: enabled
+        permanent: yes 
+    - name: copy conf file
+      template:
+        src: wordpress.conf
+        dest: /etc/nginx/conf.d/
+      notify: restart nginx
+  when: is_connect_to_internet.rc == 0
+- debug:
+    msg: "it is not connected"
+  when: is_connect_to_internet != 0
